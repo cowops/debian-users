@@ -1,0 +1,15 @@
+debian.users:
+
+  - name: user1
+    shell: /bin/bash
+
+  - name: user2
+    shell: /usr/bin/zsh
+    keys:
+      - user2_rsa.pub
+    groups:
+      - sudo
+      - www-data
+
+  - name: user3
+    remove: True

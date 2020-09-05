@@ -1,0 +1,53 @@
+---
+- name: install sudo, bash & zsh
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - sudo
+      - bash
+      - zsh
+
+- name: add users
+  user:
+    name: "{{ item.name }}"
+    shell: "{{ item.shell if item.shell is defined else '/bin/bash' }}"
+    groups: "{{ item.groups | join(',') if item.groups is defined else '' }}"
+    append: yes
+  when: item.remove is undefined or item.remove|bool == False
+  with_items: "{{ debian.users }}"
+
+- name: import keys
+  action: authorized_key user={{ item.0.name }} key="{{ lookup('file', item.1) }}"
+  when: item.remove is undefined or item.remove|bool == False
+  with_subelements:
+    - "{{ debian.users }}"
+    - keys
+    - skip_missing: True
+
+- name: remove users
+  user: name={{ item.name }} state="absent" remove="yes"
+  when: item.remove is defined and item.remove|bool == True
+  with_items: "{{ debian.users }}"
+
+- name: wheel group
+  group:
+    name: wheel
+    state: present
+
+- name: allow wheel group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: visudo -cf %s
+
+- name: add sudoers users to wheel group
+  user:
+    name: "{{ item.name }}"
+    groups: wheel
+    append: yes
+  when: item.remove is undefined or item.remove|bool == False and item.groups is defined and 'sudo' in item.groups
+  with_items: "{{ debian.users }}"
