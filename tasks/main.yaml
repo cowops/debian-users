@@ -20,7 +20,7 @@
 
 - name: import keys
   action: authorized_key user={{ item.0.name }} key="{{ lookup('file', item.1) }}"
-  when: item.remove is undefined or item.remove|bool == False
+  when: item.0.remove is undefined or item.0.remove|bool == False
   with_subelements:
     - "{{ debian.users }}"
     - keys
