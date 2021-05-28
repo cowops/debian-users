@@ -9,11 +9,15 @@
       - bash
       - zsh
 
+- name: determine available groups
+  getent:
+    database: group
+
 - name: add users
   user:
     name: "{{ item.name }}"
     shell: "{{ item.shell if item.shell is defined else '/bin/bash' }}"
-    groups: "{{ item.groups | join(',') if item.groups is defined else '' }}"
+    groups: "{{ item.groups | intersect(ansible_facts.getent_group) | join(',') if item.groups is defined else '' }}"
     append: yes
   when: item.remove is undefined or item.remove|bool == False
   with_items: "{{ debian.users }}"
