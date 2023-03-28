@@ -11,7 +11,7 @@ This role requires a debian compliant system such as ubuntu.
 Role Variables
 --------------
 
-debian.users:
+system.users:
   - name: user1
     shell: /bin/bash
   - name: user2

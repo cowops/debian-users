@@ -1,4 +1,4 @@
-debian.users:
+system.users:
 
   - name: user1
     shell: /bin/bash

@@ -20,20 +20,20 @@
     groups: "{{ item.groups | intersect(ansible_facts.getent_group) | join(',') if item.groups is defined else '' }}"
     append: yes
   when: item.remove is undefined or item.remove|bool == False
-  with_items: "{{ debian.users }}"
+  with_items: "{{ system.users }}"
 
 - name: import keys
   action: authorized_key user={{ item.0.name }} key="{{ lookup('file', item.1) }}"
   when: item.0.remove is undefined or item.0.remove|bool == False
   with_subelements:
-    - "{{ debian.users }}"
+    - "{{ system.users }}"
     - keys
     - skip_missing: True
 
 - name: remove users
   user: name={{ item.name }} state="absent" remove="yes"
   when: item.remove is defined and item.remove|bool == True
-  with_items: "{{ debian.users }}"
+  with_items: "{{ system.users }}"
 
 - name: wheel group
   group:
@@ -54,4 +54,4 @@
     groups: wheel
     append: yes
   when: item.remove is undefined or item.remove|bool == False and item.groups is defined and 'sudo' in item.groups
-  with_items: "{{ debian.users }}"
+  with_items: "{{ system.users }}"
